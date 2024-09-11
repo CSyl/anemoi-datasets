@@ -10,13 +10,21 @@ from functools import cached_property
 
 import numpy as np
 
-from .dataset import Dataset
-from .debug import debug_indexing
-from .indexing import apply_index_to_slices_changes
-from .indexing import expand_list_indexing
-from .indexing import index_to_slices
-from .indexing import length_to_slices
-from .indexing import update_tuple
+# from .dataset import Dataset
+# from .debug import debug_indexing
+# from .indexing import apply_index_to_slices_changes
+# from .indexing import expand_list_indexing
+# from .indexing import index_to_slices
+# from .indexing import length_to_slices
+# from .indexing import update_tuple
+
+from dataset import Dataset
+from debug import debug_indexing
+from indexing import apply_index_to_slices_changes
+from indexing import expand_list_indexing
+from indexing import index_to_slices
+from indexing import length_to_slices
+from indexing import update_tuple
 
 LOG = logging.getLogger(__name__)
 

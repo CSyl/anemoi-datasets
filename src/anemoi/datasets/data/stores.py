@@ -15,14 +15,22 @@ import numpy as np
 import zarr
 from anemoi.utils.dates import frequency_to_timedelta
 
-from . import MissingDateError
-from .dataset import Dataset
-from .debug import DEBUG_ZARR_LOADING
-from .debug import Node
-from .debug import Source
-from .debug import debug_indexing
-from .indexing import expand_list_indexing
-from .misc import load_config
+# from . import MissingDateError
+# from .dataset import Dataset
+# from .debug import DEBUG_ZARR_LOADING
+# from .debug import Node
+# from .debug import Source
+# from .debug import debug_indexing
+# from .indexing import expand_list_indexing
+# from .misc import load_config
+from __init__ import MissingDateError
+from dataset import Dataset
+from debug import DEBUG_ZARR_LOADING
+from debug import Node
+from debug import Source
+from debug import debug_indexing
+from indexing import expand_list_indexing
+from misc import load_config
 
 LOG = logging.getLogger(__name__)
 
@@ -58,6 +66,8 @@ class HTTPStore(ReadOnlyStore):
             raise KeyError(key)
 
         r.raise_for_status()
+        print("\nr content from HTTPS:", r.content)
+        
         return r.content
 
 
@@ -78,6 +88,8 @@ class S3Store(ReadOnlyStore):
             response = self.s3.get_object(Bucket=self.bucket, Key=self.key + "/" + key)
         except self.s3.exceptions.NoSuchKey:
             raise KeyError(key)
+
+        print("\nr content from S3:", response["Body"].read())
 
         return response["Body"].read()
 
@@ -109,6 +121,10 @@ def name_to_zarr_store(path_or_url):
 
     if store.startswith("s3://"):
         store = S3Store(store)
+        print("s3 store")
+
+    #if store.startswith("gs://"):
+        #store = S3Store(store) #<====== TODO: ADD A GCP connection?
 
     elif store.startswith("http://") or store.startswith("https://"):
         parsed = urlparse(store)
@@ -116,15 +132,19 @@ def name_to_zarr_store(path_or_url):
         if len(bits) == 5 and (bits[1], bits[3], bits[4]) == ("s3", "amazonaws", "com"):
             s3_url = f"s3://{bits[0]}{parsed.path}"
             store = S3Store(s3_url, region=bits[2])
+            print("s3 store")
         else:
             store = HTTPStore(store)
+            print("http store")
+    print("\nNeither from http nor s3:", store)
 
     return store
 
 
 def open_zarr(path, dont_fail=False, cache=None):
     try:
-        store = name_to_zarr_store(path)
+        store = name_to_zarr_store(path) # <==========================
+        print("1")
 
         if DEBUG_ZARR_LOADING:
             if isinstance(store, str):
@@ -136,10 +156,13 @@ def open_zarr(path, dont_fail=False, cache=None):
                         "Please disable it for other backends."
                     )
                 store = zarr.storage.DirectoryStore(store)
+                print("2")
             store = DebugStore(store)
+            print("3")
 
         if cache is not None:
             store = zarr.LRUStoreCache(store, max_size=cache)
+            print("4")
 
         return zarr.convenience.open(store, "r")
     except zarr.errors.PathNotFoundError:
@@ -156,7 +179,9 @@ class Zarr(Dataset):
         else:
             self.was_zarr = False
             self.path = str(path)
-            self.z = open_zarr(self.path)
+            self.z = open_zarr(self.path) 
+            print("open_zarr(path):", self.z)
+            print("ATTRIB:", [i for i in self.z.attrs])
 
         # This seems to speed up the reading of the data a lot
         self.data = self.z.data
@@ -308,6 +333,7 @@ class Zarr(Dataset):
         return Source(self, index, info=self.path)
 
     def mutate(self):
+        print("mutate")
         if len(self.z.attrs.get("missing_dates", [])):
             LOG.warning(f"Dataset {self} has missing dates")
             return ZarrWithMissingDates(self.z if self.was_zarr else self.path)
@@ -381,12 +407,17 @@ class ZarrWithMissingDates(Zarr):
 
 def zarr_lookup(name, fail=True):
 
-    if name.endswith(".zarr") or name.endswith(".zip"):
+    if name.endswith(".zarr") or name.endswith(".zip"): #<=================
+        print('**$$$*', load_config()["datasets"])
+        print("Argument ends with either .zarr or .zip")
+        print("name:", name)
         return name
 
     config = load_config()["datasets"]
+    print(load_config())
 
     if name in config["named"]:
+        print("Argument in config['named'] ")
         return config["named"][name]
 
     tried = []
@@ -394,11 +425,14 @@ def zarr_lookup(name, fail=True):
         if not location.endswith("/"):
             location += "/"
         full = location + name + ".zarr"
+        print("Full")
         tried.append(full)
         try:
             z = open_zarr(full, dont_fail=True)
+            print("open_zarr() output is:\n", z)
             if z is not None:
                 # Cache for next time
+                print("Cache for nxt time")
                 config["named"][name] = full
                 return full
         except zarr.errors.PathNotFoundError:

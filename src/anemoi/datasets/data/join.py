@@ -10,16 +10,26 @@ from functools import cached_property
 
 import numpy as np
 
-from .debug import Node
-from .debug import Source
-from .debug import debug_indexing
-from .forwards import Combined
-from .indexing import apply_index_to_slices_changes
-from .indexing import expand_list_indexing
-from .indexing import index_to_slices
-from .indexing import update_tuple
-from .misc import _auto_adjust
-from .misc import _open
+# from .debug import Node
+# from .debug import Source
+# from .debug import debug_indexing
+# from .forwards import Combined
+# from .indexing import apply_index_to_slices_changes
+# from .indexing import expand_list_indexing
+# from .indexing import index_to_slices
+# from .indexing import update_tuple
+# from .misc import _auto_adjust
+# from .misc import _open
+from debug import Node
+from debug import Source
+from debug import debug_indexing
+from forwards import Combined
+from indexing import apply_index_to_slices_changes
+from indexing import expand_list_indexing
+from indexing import index_to_slices
+from indexing import update_tuple
+from misc import _auto_adjust
+from misc import _open
 
 LOG = logging.getLogger(__name__)
 
@@ -94,7 +104,8 @@ class Join(Combined):
             if not ok:
                 LOG.warning("Dataset %r completely overridden.", d)
 
-        from .select import Select
+        #from .select import Select
+        from select2 import Select
 
         return Select(self, indices, {"overlay": variables})
 

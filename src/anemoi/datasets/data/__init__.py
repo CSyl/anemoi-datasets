@@ -7,9 +7,12 @@
 
 import logging
 
-from .misc import _open_dataset
-from .misc import add_dataset_path
-from .misc import add_named_dataset
+# from .misc import _open_dataset
+# from .misc import add_dataset_path
+# from .misc import add_named_dataset
+from misc import _open_dataset
+from misc import add_dataset_path
+from misc import add_named_dataset
 
 LOG = logging.getLogger(__name__)
 
@@ -26,7 +29,7 @@ class MissingDateError(Exception):
 
 
 def open_dataset(*args, **kwargs):
-    ds = _open_dataset(*args, **kwargs)
+    ds = _open_dataset(*args, **kwargs) #<========================================
     ds = ds.mutate()
     ds.arguments = {"args": args, "kwargs": kwargs}
     ds._check()

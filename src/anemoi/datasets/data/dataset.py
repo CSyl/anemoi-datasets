@@ -41,14 +41,16 @@ class Dataset:
             start = kwargs.pop("start", None)
             end = kwargs.pop("end", None)
 
-            from .subset import Subset
+            #from .subset import Subset
+            from subset import Subset
 
             return (
                 Subset(self, self._dates_to_indices(start, end), dict(start=start, end=end))._subset(**kwargs).mutate()
             )
 
         if "frequency" in kwargs:
-            from .subset import Subset
+            # from .subset import Subset
+            from subset import Subset
 
             if "interpolate_frequency" in kwargs:
                 raise ValueError("Cannot use both `frequency` and `interpolate_frequency`")
@@ -61,7 +63,8 @@ class Dataset:
             )
 
         if "interpolate_frequency" in kwargs:
-            from .interpolate import InterpolateFrequency
+            # from .interpolate import InterpolateFrequency
+            from interpolate import InterpolateFrequency
 
             interpolate_frequency = kwargs.pop("interpolate_frequency")
             return InterpolateFrequency(self, interpolate_frequency)._subset(**kwargs).mutate()
@@ -156,9 +159,11 @@ class Dataset:
         return np.random.permutation(len(self))
 
     def _dates_to_indices(self, start, end):
-        from .misc import as_first_date
-        from .misc import as_last_date
-
+        #from .misc import as_first_date
+        #from .misc import as_last_date
+        
+        from misc import as_first_date
+        from misc import as_last_date
         # TODO: optimize
 
         start = self.dates[0] if start is None else as_first_date(start, self.dates)
@@ -239,12 +244,20 @@ class Dataset:
 
             return v
 
+        # md = dict(
+        #     version=anemoi.datasets.__version__,
+        #     arguments=self.arguments,
+        #     **self.dataset_metadata(),
+        # )
+        print(self.arguments)
+        __version__=1.0
         md = dict(
-            version=anemoi.datasets.__version__,
+            version=__version__,
             arguments=self.arguments,
             **self.dataset_metadata(),
         )
-
+        print("***md json",md)
+        
         try:
             return json.loads(json.dumps(tidy(md)))
         except Exception:

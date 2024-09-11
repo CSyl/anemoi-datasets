@@ -1,0 +1,9 @@
+dates:
+  start: 2021-12-27T00:00:00.000000000
+  end: 2021-12-27T12:00:00.000000000
+  frequency: 6h
+  
+input:
+  xarray-zarr:
+    url: test.zarr
+    param: [2m_temperature]

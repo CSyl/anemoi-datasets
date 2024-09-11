@@ -4,6 +4,7 @@
 # In applying this licence, ECMWF does not waive the privileges and immunities
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
+import sys    
 
 import calendar
 import datetime
@@ -13,8 +14,8 @@ from pathlib import PurePath
 import numpy as np
 import zarr
 from anemoi.utils.config import load_config as load_settings
-
-from .dataset import Dataset
+#from .dataset import Dataset
+from dataset import Dataset
 
 LOG = logging.getLogger(__name__)
 
@@ -155,7 +156,8 @@ def _concat_or_join(datasets, kwargs):
     ranges = [(d.dates[0].astype(object), d.dates[-1].astype(object)) for d in datasets]
 
     if len(set(ranges)) == 1:
-        from .join import Join
+        #from .join import Join
+        from join import Join
 
         return Join(datasets)._overlay(), kwargs
 
@@ -167,25 +169,32 @@ def _concat_or_join(datasets, kwargs):
 
 
 def _open(a):
-    from .stores import Zarr
-    from .stores import zarr_lookup
+    # from .stores import Zarr
+    # from .stores import zarr_lookup
+    from stores import Zarr
+    from stores import zarr_lookup
 
     if isinstance(a, Dataset):
         return a.mutate()
 
     if isinstance(a, zarr.hierarchy.Group):
+        print("Accessed _open & arg is a zarr.hierarchy.Group type")
         return Zarr(a).mutate()
 
     if isinstance(a, str):
+        print("Accessed _open & arg is str type") # <======================================================
         return Zarr(zarr_lookup(a)).mutate()
 
     if isinstance(a, PurePath):
+        print("Accessed _open & arg is a PurePath")
         return _open(str(a)).mutate()
 
     if isinstance(a, dict):
+        print("Accessed _open & arg is a Dictionary")
         return _open_dataset(**a).mutate()
 
     if isinstance(a, (list, tuple)):
+        print("Accessed _open & arg is a (list, tuple)")
         return _open_dataset(*a).mutate()
 
     raise NotImplementedError(f"Unsupported argument: {type(a)}")
@@ -264,6 +273,7 @@ def _auto_adjust(datasets, kwargs):
 def _open_dataset(*args, **kwargs):
     sets = []
     for a in args:
+        print("Accessed _open_dataset") #<============================================ 
         sets.append(_open(a))
 
     if "xy" in kwargs:
