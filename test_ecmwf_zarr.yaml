@@ -1,0 +1,9 @@
+dates:
+  start: 2021-12-31T09:00:00
+  end: 2021-12-31T22:00:00
+  frequency: 1h
+
+input:
+  xarray-zarr:
+    url: "https://object-store.os-api.cci1.ecmwf.int/ml-examples/an-oper-2023-2023-2p5-6h-v1.zarr"
+    param: [data]

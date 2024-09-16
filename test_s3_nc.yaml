@@ -5,6 +5,6 @@ dates:
 
 input:
   xarray-kerchunk:
-    json: combined_tested.json
+    json: combined.json
     param: PV
     level: [1000, 50]
