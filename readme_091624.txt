@@ -1,18 +1,88 @@
-Findings:
+Findings (9/16/24):
 
 - Through the current main code able to read s3 files IF setting up configuration in the kerchunk-zarr format. This requires one to consolidate all the meta/attributes of each variables into a single JSON file. The JSON file must be set in the configuration prior to a anemoi dataset creation. There is only a feature to generate this JSON for NETCDF & GRIB files (NOT ZARR).
 
 When testing to see if a zarr in a S3 bucket can be converted to anemoi format via the latest anemoi-dataset package AND anemoi-dataset develop branch, unable to extract metadata and convert to json, which results in an empty MultiFieldList()
 
+__ON ZARR within Local:__
+- Without Level Set: 
+When setting up the configuration file for a zarr located in S3, able to convert zarr file to anemoi-formatted file, HOWEVER throughout conversion unable to obtain zarr's metadata. The following is repeated throughout conversion: "
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': '10m_u_component_of_wind', 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': '10m_v_component_of_wind', 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})"
+
+
+- With Level Set to 1000: 
+When setting up the configuration file for a zarr located in local, obtain an error regarding an empty MultiFieldList() when using filename as the URL in the configuration file.
+
+
+
 __ON ZARR within S3:__
-- When setting up the configuration file for a zarr located in S3, obtain an error regarding an empty MultiFieldList() when using the S3 URL (s3://noaa-ufs-gdas-pds/test_ar.zarr) and when the HTTPS URL (https://noaa-ufs-gdas-pds.s3.amazonaws.com/test_ar.zarr) in the configuration file. When  Thus, cannot obtain the entire json of a zarr when calling its S3 nor HTTPS URL in config. file.
+- Without Level Set: 
+When setting up the configuration file for a zarr located in S3, able to convert zarr file to anemoi-formatted file, HOWEVER throughout conversion unable to obtain zarr's metadata. The following is repeated throughout conversion: "AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:25:24 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'surface_pressure', 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})"
+
+- With Level Set to 1000: 
+When setting up the configuration file for a zarr located in S3, obtain an error regarding an empty MultiFieldList() when using the S3 URL (s3://noaa-ufs-gdas-pds/test_ar.zarr) and the HTTPS URL (https://noaa-ufs-gdas-pds.s3.amazonaws.com/test_ar.zarr) in the configuration file. When  Thus, cannot obtain the entire json of a zarr when calling its S3 nor HTTPS URL in config. file.
 
 - When executing the open_dataset.py within the anemoi-dataset develop branch, 'data' feature in the dataset could not be found, but when adding a dummmy data variable overrided error and another error resulted with: inability to obtained a JSON due to a JSON decoding error 
 
+
+
 __ON ZARR within GCP:__
-- When setting up the configuration file for a zarr located in GS, obtain an error regarding the inability to connect to the GCP server when using the GS URL (gs://gcp-public-data-arco-era5/ar/1959-2022-1h-360x181_equiangular_with_poles_conservative.zarr) and inability to obtained a JSON due to a JSON decoding error when using the GCP HTTPS URL w/in the configuration file. Thus, cannot set url as the path of an GS nor its HTTPS to a zarr file.
+- With & W/Out Level Set to 1000: 
+When setting up the configuration file for a zarr located in GS, obtain an error regarding the inability to connect to the GCP server when using the GS URL (gs://gcp-public-data-arco-era5/ar/1959-2022-1h-360x181_equiangular_with_poles_conservative.zarr) and inability to obtained a JSON due to a JSON decoding error when using the GCP HTTPS URL w/in the configuration file. Thus, cannot set url as the path of an GS nor its HTTPS to a zarr file.
 
 - When executing the open_dataset.py within the anemoi-dataset develop branch, 'data' feature in the dataset could not be found.
+
+
+__ON ZARR from ECMWF within ECMWF:__
+When setting up the configuration file for a zarr located in ECMWF, obtain failure to open zarr store with metadata
+
+
+__ON NC within S3:__
+When setting up the configuration file for a netcdf located in S3 with kerchunk formatted configuration file, able to convert zarr file to anemoi-formatted file, HOWEVER throughout conversion unable to obtain zarr's metadata. The following is repeated throughout conversion: 
+"2024-09-16 18:27:58 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'PV', 'level': 1000, 'time': '2000', 'date': '20240301', 'step': 0, 'valid_datetime': '2024-03-01T20:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:27:58 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'PV', 'level': 50, 'time': '2000', 'date': '20240301', 'step': 0, 'valid_datetime': '2024-03-01T20:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:27:58 WARNING Dataset name error: the dataset name 'test_s3_nc' does not follow naming convention. Does not match ^(\w+)-([\w-]+)-(\w+)-(\w+)-(\d\d\d\d)-(\d\d\d\d)-(\d+h)-v(\d+)-?([a-zA-Z0-9-]+)?$
+2024-09-16 18:27:58 INFO Number of years 0 < 10, leaving out 20%. end=np.datetime64('2024-03-01T22:00:00')
+2024-09-16 18:27:58 INFO Will compute statistics from 2024-03-01T20:00:00 to 2024-03-01T22:00:00
+❌❌❌ FIXME: Config serialisation to be checked"
 
 
 
@@ -23,75 +93,659 @@ TODO:
 3) TEST the test_kerchunk print("CHECK HERE ON THE JSON & HOW IT LOOKS PRIOR TO IT BEING ADD WITH MULTIZARRTOZARR", jsons)
 & then, NEED TO SETUP A WAY TO consolidate all the meta/attributes of each variables of a ZARR file into a JSON file. 
 
-4) Test if a zarr in a S3 bucket can be converted to anemoi format via the latest anemoi-dataset package AND anemoi-dataset develop branch. Conclusion:  With anemoi-dataset latest version, results in an empty MultiFieldList(). With anemoi-dataset develop branch, unable to extract metadata and convert to json due to JSONDecodeError: Expecting value: line 1 column 1 (char 0). Note: 'data' feature in the dataset could not be found, but to get around this a data variable was added to the zarr store in cloud to override error.
+4) Test if a zarr in a S3 bucket can be converted to anemoi format via the latest anemoi-dataset package AND anemoi-dataset develop branch. Conclusion:  With anemoi-dataset latest version, able to convert to anemoi-formatted data, HOWEVER results in an error regarding the metadata. With anemoi-dataset develop branch, unable to extract metadata and convert to json due to JSONDecodeError: Expecting value: line 1 column 1 (char 0). Note: 'data' feature in the dataset could not be found, but to get around this a data variable was added to the zarr store in cloud to override error.
 
-> With anemoi-datasets create
-- ** Result: ** 
-(anemoi_test)     anemoi % anemoi-datasets create test_s3_zarr.yaml test_s3_zarr.zarr
-2024-09-16 11:15:58 INFO Task init((),{}) starting
-2024-09-16 11:15:58 INFO Setting flatten_grid=True in config
-2024-09-16 11:15:58 INFO Setting ensemble_dimension=2 in config
-2024-09-16 11:15:58 INFO Setting flatten_grid=True in config
-2024-09-16 11:15:58 INFO Setting ensemble_dimension=2 in config
-2024-09-16 11:15:58 INFO {'start': datetime.datetime(2021, 12, 31, 9, 0), 'end': datetime.datetime(2021, 12, 31, 15, 0), 'frequency': '1h', 'group_by': 'monthly'}
-2024-09-16 11:15:58 INFO Groups(dates=1)
-2024-09-16 11:15:58 INFO FunctionAction: url=s3://noaa-ufs-gdas-pds/test_ar.zarr param=2m_temperature level=[1000] 
-2024-09-16 11:15:58 INFO Minimal input for 'init' step (using only the first date) :
-2024-09-16 11:15:58 INFO xarray-zarr(['2021-12-31T09:00:00'])
-2024-09-16 11:15:58 INFO Config loaded ok:
-2024-09-16 11:15:58 INFO Found 7 datetimes.
-2024-09-16 11:15:58 INFO Dates: Found 7 datetimes, in 1 groups: 
-2024-09-16 11:15:58 INFO Missing dates: 0
-2024-09-16 11:15:59 WARNING No data found for s3://noaa-ufs-gdas-pds/test_ar.zarr and dates ['2021-12-31T09:00:00'] and {'param': '2m_temperature', 'level': [1000]}
-2024-09-16 11:15:59 WARNING Options: {}
-['valid_datetime', '2021-12-31T09:00:00', 'param', '10m_u_component_of_wind', 'level', 'None']
-['valid_datetime', '2021-12-31T10:00:00', 'param', '10m_u_component_of_wind', 'level', 'None']
-['valid_datetime', '2021-12-31T11:00:00', 'param', '10m_u_component_of_wind', 'level', 'None']
-['valid_datetime', '2021-12-31T12:00:00', 'param', '10m_u_component_of_wind', 'level', 'None']
-['valid_datetime', '2021-12-31T13:00:00', 'param', '10m_u_component_of_wind', 'level', 'None']
-['valid_datetime', '2021-12-31T14:00:00', 'param', '10m_u_component_of_wind', 'level', 'None']
-['valid_datetime', '2021-12-31T15:00:00', 'param', '10m_u_component_of_wind', 'level', 'None']
-['valid_datetime', '2021-12-31T16:00:00', 'param', '10m_u_component_of_wind', 'level', 'None']
-['valid_datetime', '2021-12-31T17:00:00', 'param', '10m_u_component_of_wind', 'level', 'None']
-['valid_datetime', '2021-12-31T18:00:00', 'param', '10m_u_component_of_wind', 'level', 'None']
-['valid_datetime', '2021-12-31T19:00:00', 'param', '10m_u_component_of_wind', 'level', 'None']
-['valid_datetime', '2021-12-31T20:00:00', 'param', '10m_u_component_of_wind', 'level', 'None']
-['valid_datetime', '2021-12-31T21:00:00', 'param', '10m_u_component_of_wind', 'level', 'None']
-['valid_datetime', '2021-12-31T22:00:00', 'param', '10m_u_component_of_wind', 'level', 'None']
-['valid_datetime', '2021-12-31T09:00:00', 'param', '10m_v_component_of_wind', 'level', 'None']
-['valid_datetime', '2021-12-31T10:00:00', 'param', '10m_v_component_of_wind', 'level', 'None']
-['valid_datetime', '2021-12-31T11:00:00', 'param', '10m_v_component_of_wind', 'level', 'None']
-['valid_datetime', '2021-12-31T12:00:00', 'param', '10m_v_component_of_wind', 'level', 'None']
+>>> With anemoi-datasets create (w/o level set)
+- **Result:**
+(anemoi_test)  test_scripts % anemoi-datasets create test_s3_zarr.yaml test_s3_zarr.zarr
+2024-09-16 17:01:35 INFO Task init((),{}) starting
+2024-09-16 17:01:35 INFO Setting flatten_grid=True in config
+2024-09-16 17:01:35 INFO Setting ensemble_dimension=2 in config
+2024-09-16 17:01:35 INFO Setting flatten_grid=True in config
+2024-09-16 17:01:35 INFO Setting ensemble_dimension=2 in config
+2024-09-16 17:01:35 INFO {'start': datetime.datetime(2021, 12, 31, 9, 0), 'end': datetime.datetime(2021, 12, 31, 15, 0), 'frequency': '1h', 'group_by': 'monthly'}
+2024-09-16 17:01:35 INFO Groups(dates=1)
+2024-09-16 17:01:35 INFO FunctionAction: url=s3://noaa-ufs-gdas-pds/test_ar.zarr param=['2m_temperature', '10m_u_component_of_wind', 'geopotential', '10m_v_component_of_wind', 'surface_pressure'] 
+2024-09-16 17:01:35 INFO Minimal input for 'init' step (using only the first date) :
+2024-09-16 17:01:35 INFO xarray-zarr(['2021-12-31T09:00:00'])
+2024-09-16 17:01:35 INFO Config loaded ok:
+2024-09-16 17:01:35 INFO Found 7 datetimes.
+2024-09-16 17:01:35 INFO Dates: Found 7 datetimes, in 1 groups: 
+2024-09-16 17:01:35 INFO Missing dates: 0
+2024-09-16 17:01:35 INFO Found credentials in shared credentials file: ~/.aws/credentials
+2024-09-16 17:01:36 INFO Found 41 variables : 10m_u_component_of_wind,10m_v_component_of_wind,2m_temperature,geopotential_1,geopotential_10,geopotential_100,geopotential_1000,geopotential_125,geopotential_150,geopotential_175,geopotential_2,geopotential_20,geopotential_200,geopotential_225,geopotential_250,geopotential_3,geopotential_30,geopotential_300,geopotential_350,geopotential_400,geopotential_450,geopotential_5,geopotential_50,geopotential_500,geopotential_550,geopotential_600,geopotential_650,geopotential_7,geopotential_70,geopotential_700,geopotential_750,geopotential_775,geopotential_800,geopotential_825,geopotential_850,geopotential_875,geopotential_900,geopotential_925,geopotential_950,geopotential_975,surface_pressure.
+2024-09-16 17:01:36 INFO Found 1 ensembles : 0.
+2024-09-16 17:01:36 INFO gridpoints size: [65160, 65160]
+2024-09-16 17:01:36 INFO resolution=None
+2024-09-16 17:01:36 INFO total_shape = [7, 41, 1, 65160]
+2024-09-16 17:01:36 INFO chunks=(1, 41, 1, 65160)
+2024-09-16 17:01:36 INFO Creating Dataset 'test_s3_zarr.zarr', with total_shape=[7, 41, 1, 65160], chunks=(1, 41, 1, 65160) and dtype='float32'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': '10m_u_component_of_wind', 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
 Traceback (most recent call last):
-  File "  /miniconda3/envs/anemoi_test/bin/anemoi-datasets", line 8, in <module>
-    sys.exit(main())
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/__main__.py", line 24, in main
-    cli_main(__version__, __doc__, COMMANDS)
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/utils/cli.py", line 135, in cli_main
-    cmd.run(args)
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/commands/create.py", line 64, in run
-    self.serial_create(args)
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/commands/create.py", line 74, in serial_create
-    task("init", options)
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/commands/create.py", line 29, in task
-    result = c.run()
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/__init__.py", line 355, in run
-    return self._run()
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/__init__.py", line 375, in _run
-    variables = self.minimal_input.variables
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 480, in variables
-    self.build_coords()
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 431, in build_coords
-    from_data = self.get_cube().user_coords
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 238, in get_cube
-    cube = ds.cube(
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 1491, in cube
-    return FieldCube(self, *args, **kwargs)
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/indexing/cube.py", line 55, in __init__
-    assert len(ds), f"No data in {ds}"
-AssertionError: No data in MultiFieldList()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': '10m_v_component_of_wind', 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': '2m_temperature', 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 1, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 2, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 3, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 5, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 7, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 10, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 20, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 30, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 50, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 70, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 100, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 125, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 150, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 175, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 200, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 225, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 250, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 300, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 350, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 400, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 450, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 500, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 550, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 600, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 650, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 700, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 750, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 775, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 800, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 825, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 850, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 875, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 900, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 925, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 950, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 975, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 1000, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'surface_pressure', 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 17:01:36 WARNING Dataset name error: the dataset name 'test_s3_zarr' does not follow naming convention. Does not match ^(\w+)-([\w-]+)-(\w+)-(\w+)-(\d\d\d\d)-(\d\d\d\d)-(\d+h)-v(\d+)-?([a-zA-Z0-9-]+)?$
+2024-09-16 17:01:36 INFO Number of years 0 < 10, leaving out 20%. end=np.datetime64('2021-12-31T13:00:00')
+2024-09-16 17:01:36 INFO Will compute statistics from 2021-12-31T09:00:00 to 2021-12-31T13:00:00
+❌❌❌ FIXME: Config serialisation to be checked
+{"attribution": "unknown", "build": {"group_by": "monthly", "use_grib_paramid": false, "variable_naming": "default"}, "config_path": " ~ /anemoi/gh_most_uptodate/test_scripts/test_s3_zarr.yaml", "dataset_status": "experimental", "dates": {"end": "2021-12-31 15:00:00", "frequency": "1h", "group_by": "monthly", "start": "2021-12-31 09:00:00"}, "description": "No description provided.", "input": {"xarray-zarr": {"param": ["2m_temperature", "10m_u_component_of_wind", "geopotential", "10m_v_component_of_wind", "surface_pressure"], "url": "s3://noaa-ufs-gdas-pds/test_ar.zarr"}}, "licence": "unknown", "output": {"chunking": {"dates": 1, "ensembles": 1}, "dtype": "float32", "ensemble_dimension": 2, "flatten_grid": true, "order_by": {"number": "ascending", "param_level": "ascending", "valid_datetime": "ascending"}, "remapping": {"param_level": "{param}_{levelist}"}, "statistics": "param_level"}, "reading_chunks": null, "statistics": {"allow_nans": []}}
+{"attribution": "unknown", "build": {"group_by": "monthly", "use_grib_paramid": false, "variable_naming": "default"}, "config_path": " ~ /anemoi/gh_most_uptodate/test_scripts/test_s3_zarr.yaml", "dataset_status": "experimental", "dates": {"end": "2021-12-31 15:00:00", "frequency": "1h", "group_by": "monthly", "start": "2021-12-31 09:00:00"}, "description": "No description provided.", "input": {"xarray-zarr": {"param": ["2m_temperature", "10m_u_component_of_wind", "geopotential", "10m_v_component_of_wind", "surface_pressure"], "url": "s3://noaa-ufs-gdas-pds/test_ar.zarr"}}, "licence": "unknown", "output": {"chunking": {"dates": 1, "ensembles": 1}, "dtype": "float32", "ensemble_dimension": 2, "flatten_grid": true, "order_by": {"number": "ascending", "param_level": "ascending", "valid_datetime": "ascending"}, "remapping": {"param_level": "{param}_{levelist}"}, "statistics": "param_level"}, "reading_chunks": null, "statistics": {"allow_nans": []}}
+2024-09-16 17:01:36 INFO Task load((),{}) starting
+2024-09-16 17:01:36 INFO {'end': '2021-12-31T15:00:00', 'frequency': '1h', 'group_by': 'monthly', 'start': '2021-12-31T09:00:00'}
+2024-09-16 17:01:36 INFO Groups(dates=1)
+2024-09-16 17:01:36 INFO FunctionAction: param=['2m_temperature', '10m_u_component_of_wind', 'geopotential', '10m_v_component_of_wind', 'surface_pressure'] url=s3://noaa-ufs-gdas-pds/test_ar.zarr 
+Loading 286/287: 100%|████████████████████████████████████████████████| 287/287 [17:30<00:00,  3.66s/it]
+2024-09-16 17:19:09 INFO Name               : /data
+Type               : zarr.core.Array
+Data type          : float32
+Shape              : (7, 41, 1, 65160)
+Chunk shape        : (1, 41, 1, 65160)
+Order              : C
+Read-only          : True
+Compressor         : Blosc(cname='lz4', clevel=5, shuffle=SHUFFLE, blocksize=0)
+Store type         : zarr.storage.DirectoryStore
+No. bytes          : 74803680 (71.3M)
+No. bytes stored   : 46171298 (44.0M)
+Storage ratio      : 1.6
+Chunks initialized : 7/7
 
-> With anemoi-datasets develop branch
+2024-09-16 17:19:09 INFO Task finalise((),{}) starting
+2024-09-16 17:19:09 INFO Variables minimum maximum mean stdev has_nans
+10m_u_component_of_wind -19.22 20.02 -0.21 5.07 0.00
+10m_v_component_of_wind -18.40 22.14 -0.31 4.52 0.00
+2m_temperature 221.89 314.19 277.28 20.29 0.00
+geopotential_1 425099.12 493177.06 465580.66 17597.70 0.00
+geopotential_10 275382.28 311868.09 300905.67 9335.71 0.00
+geopotential_100 147750.47 163643.91 157289.11 5047.06 0.00
+geopotential_1000 -3148.51 3412.69 803.33 1074.06 0.00
+geopotential_125 134752.38 151257.64 143848.28 5454.83 0.00
+geopotential_150 123978.36 140592.05 132738.73 5685.26 0.00
+geopotential_175 114715.02 131239.23 123241.65 5776.61 0.00
+geopotential_2 375595.91 435469.00 413453.18 15202.28 0.00
+geopotential_20 237253.33 263633.00 256183.44 6847.39 0.00
+geopotential_200 106600.71 122853.99 114931.86 5760.12 0.00
+geopotential_225 99338.30 115186.59 107532.10 5654.89 0.00
+geopotential_250 92746.42 108154.01 100847.36 5479.85 0.00
+geopotential_3 348050.31 402467.94 383698.48 13687.42 0.00
+geopotential_30 215299.84 236499.61 230671.53 5565.93 0.00
+geopotential_300 81240.40 95595.55 89072.89 5011.66 0.00
+geopotential_350 71393.13 84574.07 78837.40 4504.77 0.00
+geopotential_400 62807.23 74774.52 69719.65 4025.45 0.00
+geopotential_450 55192.48 65991.05 61474.21 3589.37 0.00
+geopotential_5 315959.47 362674.59 347583.37 11830.03 0.00
+geopotential_50 187061.36 204328.94 199092.38 4529.33 0.00
+geopotential_500 48281.08 57939.14 53936.27 3196.53 0.00
+geopotential_550 41918.73 50613.62 46987.17 2841.30 0.00
+geopotential_600 35997.41 43799.02 40538.04 2518.81 0.00
+geopotential_650 30153.02 37523.20 34517.80 2224.94 0.00
+geopotential_7 295866.34 337658.84 324610.02 10625.11 0.00
+geopotential_70 168151.08 183816.19 178660.26 4474.38 0.00
+geopotential_700 24665.59 31663.84 28868.57 1958.68 0.00
+geopotential_750 19501.80 26130.66 23546.72 1719.80 0.00
+geopotential_775 16960.49 23517.15 20997.52 1610.89 0.00
+geopotential_800 14486.60 21037.37 18517.69 1509.48 0.00
+geopotential_825 12078.31 18634.43 16103.91 1416.13 0.00
+geopotential_850 9734.64 16290.45 13753.17 1331.81 0.00
+geopotential_875 7452.32 14022.52 11462.44 1257.58 0.00
+geopotential_900 5226.78 11806.53 9228.56 1194.33 0.00
+geopotential_925 3055.42 9639.81 7048.56 1143.09 0.00
+geopotential_950 938.20 7520.03 4919.37 1104.96 0.00
+geopotential_975 -1126.84 5445.05 2838.39 1081.66 0.00
+surface_pressure 51776.86 104166.40 96733.70 9549.54 0.00
+2024-09-16 17:19:09 INFO Wrote statistics in test_s3_zarr.zarr
+Computing size of test_s3_zarr.zarr: 16it [00:00, 28826.83it/s]
+2024-09-16 17:19:09 INFO Total size: 44.1 MiB
+2024-09-16 17:19:09 INFO Total number of files: 53
+2024-09-16 17:19:09 INFO Task patch((),{}) starting
+2024-09-16 17:19:09 INFO ✅ Remove _create_yaml_config
+2024-09-16 17:19:09 INFO Dataset changed by patch
+2024-09-16 17:19:09 INFO Task init_additions((),{}) starting
+2024-09-16 17:19:09 WARNING No delta found in kwargs, no addtions will be computed.
+2024-09-16 17:19:09 INFO Task run_additions((),{}) starting
+2024-09-16 17:19:09 WARNING No delta found in kwargs, no addtions will be computed.
+2024-09-16 17:19:09 INFO Task finalise_additions((),{}) starting
+2024-09-16 17:19:09 WARNING No delta found in kwargs, no addtions will be computed.
+Computing size of test_s3_zarr.zarr: 16it [00:00, 29799.67it/s]
+2024-09-16 17:19:09 INFO Total size: 44.1 MiB
+2024-09-16 17:19:09 INFO Total number of files: 53
+2024-09-16 17:19:09 INFO Task cleanup((),{}) starting
+2024-09-16 17:19:09 INFO Task verify((),{}) starting
+2024-09-16 17:19:09 INFO Verifying dataset at test_s3_zarr.zarr
+2024-09-16 17:19:09 INFO test_s3_zarr.zarr
+2024-09-16 17:19:09 INFO Create completed in 17 minutes 33 seconds
+
+
+
+>>> With anemoi-datasets develop branch
 - from __init__ import add_dataset_path
 - from __init__ import open_dataset
 - ds2 = open_dataset("s3://noaa-ufs-gdas-pds/test_ar.zarr")
@@ -215,86 +869,50 @@ File ~/miniconda3/envs/anemoi_env/lib/python3.11/json/decoder.py:355, in JSONDec
 
 JSONDecodeError: Expecting value: line 1 column 1 (char 0)
 
-5) Test if a zarr in a GS bucket can be converted to anemoi format via the latest anemoi-dataset package AND anemoi-dataset develop branch. Conclusion: With anemoi-dataset latest version, a connection to GCP server cannot be established when using the GS URL & unable to extract metadata and convert to json due to JSONDecodeError: Expecting value: line 1 column 1 (char 0) wen using GCP HTTPS URL. With anemoi-dataset develop branch, 'data' feature in the dataset could not be found.
 
-> With anemoi-datasets create, using GS URL...
-** Results:
-anemoi_test)     anemoi % anemoi-datasets create test_gcp_zarr.yaml test_gcp_zarr.zarr
-2024-09-16 11:54:30 INFO Task init((),{}) starting
-2024-09-16 11:54:30 INFO Setting flatten_grid=True in config
-2024-09-16 11:54:30 INFO Setting ensemble_dimension=2 in config
-2024-09-16 11:54:30 INFO Setting flatten_grid=True in config
-2024-09-16 11:54:30 INFO Setting ensemble_dimension=2 in config
-2024-09-16 11:54:30 INFO {'start': datetime.datetime(2021, 12, 31, 9, 0), 'end': datetime.datetime(2021, 12, 31, 22, 0), 'frequency': '1h', 'group_by': 'monthly'}
-2024-09-16 11:54:30 INFO Groups(dates=1)
-2024-09-16 11:54:30 INFO FunctionAction: url=gs://gcp-public-data-arco-era5/ar/1959-2022-1h-360x181_equiangular_with_poles_conservative.zarr param=2m_temperature level=[1000] 
-2024-09-16 11:54:30 INFO Minimal input for 'init' step (using only the first date) :
-2024-09-16 11:54:30 INFO xarray-zarr(['2021-12-31T09:00:00'])
-2024-09-16 11:54:30 INFO Config loaded ok:
-2024-09-16 11:54:30 INFO Found 14 datetimes.
-2024-09-16 11:54:30 INFO Dates: Found 14 datetimes, in 1 groups: 
-2024-09-16 11:54:30 INFO Missing dates: 0
-2024-09-16 11:54:33 WARNING Compute Engine Metadata server unavailable on attempt 1 of 3. Reason: timed out
-2024-09-16 11:54:37 WARNING Compute Engine Metadata server unavailable on attempt 2 of 3. Reason: timed out
-2024-09-16 11:54:39 WARNING Compute Engine Metadata server unavailable on attempt 3 of 3. Reason: [Errno 64] Host is down
-2024-09-16 11:54:39 WARNING Authentication failed using Compute Engine authentication due to unavailable metadata server.
-2024-09-16 11:54:39 WARNING Compute Engine Metadata server unavailable on attempt 1 of 5. Reason: HTTPConnectionPool(host='metadata.google.internal', port=80): Max retries exceeded with url: /computeMetadata/v1/instance/service-accounts/default/?recursive=true (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x11c4bdf30>: Failed to establish a new connection: [Errno 8] nodename nor servname provided, or not known'))
-2024-09-16 11:54:40 WARNING Compute Engine Metadata server unavailable on attempt 2 of 5. Reason: HTTPConnectionPool(host='metadata.google.internal', port=80): Max retries exceeded with url: /computeMetadata/v1/instance/service-accounts/default/?recursive=true (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x11c4be4a0>: Failed to establish a new connection: [Errno 8] nodename nor servname provided, or not known'))
-2024-09-16 11:54:42 WARNING Compute Engine Metadata server unavailable on attempt 3 of 5. Reason: HTTPConnectionPool(host='metadata.google.internal', port=80): Max retries exceeded with url: /computeMetadata/v1/instance/service-accounts/default/?recursive=true (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x11c4be8f0>: Failed to establish a new connection: [Errno 8] nodename nor servname provided, or not known'))
-2024-09-16 11:54:46 WARNING Compute Engine Metadata server unavailable on attempt 4 of 5. Reason: HTTPConnectionPool(host='metadata.google.internal', port=80): Max retries exceeded with url: /computeMetadata/v1/instance/service-accounts/default/?recursive=true (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x11c4bee00>: Failed to establish a new connection: [Errno 8] nodename nor servname provided, or not known'))
 
-> With anemoi-datasets create, using GCP HTTPS URL...
-** Results:
-
-(anemoi_test)     anemoi % anemoi-datasets create test_gcp_zarr.yaml test_gcp_zarr.zarr
-2024-09-16 12:08:32 INFO Task init((),{}) starting
-2024-09-16 12:08:32 INFO Setting flatten_grid=True in config
-2024-09-16 12:08:32 INFO Setting ensemble_dimension=2 in config
-2024-09-16 12:08:32 INFO Setting flatten_grid=True in config
-2024-09-16 12:08:32 INFO Setting ensemble_dimension=2 in config
-2024-09-16 12:08:32 INFO {'start': datetime.datetime(2021, 12, 31, 9, 0), 'end': datetime.datetime(2021, 12, 31, 22, 0), 'frequency': '1h', 'group_by': 'monthly'}
-2024-09-16 12:08:32 INFO Groups(dates=1)
-2024-09-16 12:08:32 INFO FunctionAction: url=https://console.cloud.google.com/storage/browser/gcp-public-data-arco-era5/ar/1959-2022-1h-360x181_equiangular_with_poles_conservative.zarr param=2m_temperature level=[1000] 
-2024-09-16 12:08:32 INFO Minimal input for 'init' step (using only the first date) :
-2024-09-16 12:08:32 INFO xarray-zarr(['2021-12-31T09:00:00'])
-2024-09-16 12:08:32 INFO Config loaded ok:
-2024-09-16 12:08:32 INFO Found 14 datetimes.
-2024-09-16 12:08:32 INFO Dates: Found 14 datetimes, in 1 groups: 
-2024-09-16 12:08:32 INFO Missing dates: 0
-2024-09-16 12:08:33 ERROR Error in execute
+>>> With anemoi-datasets create (w/ level set)
+- ** Result: ** 
+(anemoi_test)     anemoi % anemoi-datasets create test_s3_zarr.yaml test_s3_zarr.zarr
+2024-09-16 11:15:58 INFO Task init((),{}) starting
+2024-09-16 11:15:58 INFO Setting flatten_grid=True in config
+2024-09-16 11:15:58 INFO Setting ensemble_dimension=2 in config
+2024-09-16 11:15:58 INFO Setting flatten_grid=True in config
+2024-09-16 11:15:58 INFO Setting ensemble_dimension=2 in config
+2024-09-16 11:15:58 INFO {'start': datetime.datetime(2021, 12, 31, 9, 0), 'end': datetime.datetime(2021, 12, 31, 15, 0), 'frequency': '1h', 'group_by': 'monthly'}
+2024-09-16 11:15:58 INFO Groups(dates=1)
+2024-09-16 11:15:58 INFO FunctionAction: url=s3://noaa-ufs-gdas-pds/test_ar.zarr param=2m_temperature level=[1000] 
+2024-09-16 11:15:58 INFO Minimal input for 'init' step (using only the first date) :
+2024-09-16 11:15:58 INFO xarray-zarr(['2021-12-31T09:00:00'])
+2024-09-16 11:15:58 INFO Config loaded ok:
+2024-09-16 11:15:58 INFO Found 7 datetimes.
+2024-09-16 11:15:58 INFO Dates: Found 7 datetimes, in 1 groups: 
+2024-09-16 11:15:58 INFO Missing dates: 0
+2024-09-16 11:15:59 WARNING No data found for s3://noaa-ufs-gdas-pds/test_ar.zarr and dates ['2021-12-31T09:00:00'] and {'param': '2m_temperature', 'level': [1000]}
+2024-09-16 11:15:59 WARNING Options: {}
+['valid_datetime', '2021-12-31T09:00:00', 'param', '10m_u_component_of_wind', 'level', 'None']
+['valid_datetime', '2021-12-31T10:00:00', 'param', '10m_u_component_of_wind', 'level', 'None']
+['valid_datetime', '2021-12-31T11:00:00', 'param', '10m_u_component_of_wind', 'level', 'None']
+['valid_datetime', '2021-12-31T12:00:00', 'param', '10m_u_component_of_wind', 'level', 'None']
+['valid_datetime', '2021-12-31T13:00:00', 'param', '10m_u_component_of_wind', 'level', 'None']
+['valid_datetime', '2021-12-31T14:00:00', 'param', '10m_u_component_of_wind', 'level', 'None']
+['valid_datetime', '2021-12-31T15:00:00', 'param', '10m_u_component_of_wind', 'level', 'None']
+['valid_datetime', '2021-12-31T16:00:00', 'param', '10m_u_component_of_wind', 'level', 'None']
+['valid_datetime', '2021-12-31T17:00:00', 'param', '10m_u_component_of_wind', 'level', 'None']
+['valid_datetime', '2021-12-31T18:00:00', 'param', '10m_u_component_of_wind', 'level', 'None']
+['valid_datetime', '2021-12-31T19:00:00', 'param', '10m_u_component_of_wind', 'level', 'None']
+['valid_datetime', '2021-12-31T20:00:00', 'param', '10m_u_component_of_wind', 'level', 'None']
+['valid_datetime', '2021-12-31T21:00:00', 'param', '10m_u_component_of_wind', 'level', 'None']
+['valid_datetime', '2021-12-31T22:00:00', 'param', '10m_u_component_of_wind', 'level', 'None']
+['valid_datetime', '2021-12-31T09:00:00', 'param', '10m_v_component_of_wind', 'level', 'None']
+['valid_datetime', '2021-12-31T10:00:00', 'param', '10m_v_component_of_wind', 'level', 'None']
+['valid_datetime', '2021-12-31T11:00:00', 'param', '10m_v_component_of_wind', 'level', 'None']
+['valid_datetime', '2021-12-31T12:00:00', 'param', '10m_v_component_of_wind', 'level', 'None']
 Traceback (most recent call last):
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 586, in datasource
-    return _tidy(self.action.function(FunctionContext(self), self.dates, *args, **kwargs))
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray_zarr.py", line 15, in execute
-    return load_many("🇿", context, dates, url, *args, **kwargs)
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/__init__.py", line 77, in load_many
-    result.append(load_one(emoji, context, dates, path, **kwargs))
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/__init__.py", line 47, in load_one
-    data = xr.open_zarr(name_to_zarr_store(dataset), **options)
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/zarr.py", line 1103, in open_zarr
-    ds = open_dataset(
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/api.py", line 611, in open_dataset
-    backend_ds = backend.open_dataset(
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/zarr.py", line 1173, in open_dataset
-    store = ZarrStore.open_group(
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/zarr.py", line 483, in open_group
-    zarr_group, consolidate_on_close, close_store_on_close = _get_open_params(
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/zarr.py", line 1335, in _get_open_params
-    zarr_group = zarr.open_consolidated(store, **open_kwargs)
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/zarr/convenience.py", line 1360, in open_consolidated
-    meta_store = ConsolidatedStoreClass(store, metadata_key=metadata_key)
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/zarr/storage.py", line 3046, in __init__
-    meta = json_loads(self.store[metadata_key])
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/zarr/util.py", line 76, in json_loads
-    return json.loads(ensure_text(s, "utf-8"))
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/json/__init__.py", line 346, in loads
-    return _default_decoder.decode(s)
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/json/decoder.py", line 337, in decode
-    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/json/decoder.py", line 355, in raw_decode
-    raise JSONDecodeError("Expecting value", s, err.value) from None
-json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
-Traceback (most recent call last):
+  File "  /miniconda3/envs/anemoi_test/bin/anemoi-datasets", line 8, in <module>
+    sys.exit(main())
+  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/__main__.py", line 24, in main
+    cli_main(__version__, __doc__, COMMANDS)
   File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/utils/cli.py", line 135, in cli_main
     cmd.run(args)
   File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/commands/create.py", line 64, in run
@@ -311,52 +929,157 @@ Traceback (most recent call last):
     self.build_coords()
   File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 431, in build_coords
     from_data = self.get_cube().user_coords
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 226, in get_cube
-    ds = self.datasource
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/functools.py", line 981, in __get__
-    val = self.func(instance)
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 90, in wrapper
-    result = method(self, *args, **kwargs)
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/template.py", line 26, in wrapper
-    result = method(self, *args, **kwargs)
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/trace.py", line 56, in wrapper
-    result = method(self, *args, **kwargs)
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 586, in datasource
+  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 238, in get_cube
+    cube = ds.cube(
+  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 1491, in cube
+    return FieldCube(self, *args, **kwargs)
+  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/indexing/cube.py", line 55, in __init__
+    assert len(ds), f"No data in {ds}"
+AssertionError: No data in MultiFieldList()
+
+5) Test if a zarr in a GS bucket can be converted to anemoi format via the latest anemoi-dataset package AND anemoi-dataset develop branch. Conclusion: With anemoi-dataset latest version, a connection to GCP server cannot be established when using the GS URL & unable to extract metadata and convert to json due to JSONDecodeError: Expecting value: line 1 column 1 (char 0) wen using GCP HTTPS URL. With anemoi-dataset develop branch, 'data' feature in the dataset could not be found.
+
+> With anemoi-datasets create, using GS URL...
+** Results:
+(anemoi_test)  test_scripts % anemoi-datasets create test_gcp_zarr_gsurl.yaml test_gcp_zarr.zarr
+2024-09-16 18:00:11 INFO Task init((),{}) starting
+2024-09-16 18:00:11 INFO Setting flatten_grid=True in config
+2024-09-16 18:00:11 INFO Setting ensemble_dimension=2 in config
+2024-09-16 18:00:11 INFO Setting flatten_grid=True in config
+2024-09-16 18:00:11 INFO Setting ensemble_dimension=2 in config
+2024-09-16 18:00:11 INFO {'start': datetime.datetime(2021, 12, 31, 9, 0), 'end': datetime.datetime(2021, 12, 31, 22, 0), 'frequency': '1h', 'group_by': 'monthly'}
+2024-09-16 18:00:11 INFO Groups(dates=1)
+2024-09-16 18:00:11 INFO FunctionAction: url=gs://gcp-public-data-arco-era5/ar/1959-2022-full_37-6h-0p25deg_derived.zarr param=['2m_temperature', '10m_u_component_of_wind', 'geopotential', '10m_v_component_of_wind', 'surface_pressure'] 
+2024-09-16 18:00:11 INFO Minimal input for 'init' step (using only the first date) :
+2024-09-16 18:00:11 INFO xarray-zarr(['2021-12-31T09:00:00'])
+2024-09-16 18:00:11 INFO Config loaded ok:
+2024-09-16 18:00:11 INFO Found 14 datetimes.
+2024-09-16 18:00:11 INFO Dates: Found 14 datetimes, in 1 groups: 
+2024-09-16 18:00:11 INFO Missing dates: 0
+2024-09-16 18:00:14 WARNING Compute Engine Metadata server unavailable on attempt 1 of 3. Reason: timed out
+2024-09-16 18:00:15 WARNING Compute Engine Metadata server unavailable on attempt 2 of 3. Reason: [Errno 65] No route to host
+2024-09-16 18:00:17 WARNING Compute Engine Metadata server unavailable on attempt 3 of 3. Reason: [Errno 64] Host is down
+2024-09-16 18:00:17 WARNING Authentication failed using Compute Engine authentication due to unavailable metadata server.
+2024-09-16 18:00:17 WARNING Compute Engine Metadata server unavailable on attempt 1 of 5. Reason: HTTPConnectionPool(host='metadata.google.internal', port=80): Max retries exceeded with url: /computeMetadata/v1/instance/service-accounts/default/?recursive=true (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x12740d600>: Failed to establish a new connection: [Errno 8] nodename nor servname provided, or not known'))
+2024-09-16 18:00:19 WARNING Compute Engine Metadata server unavailable on attempt 2 of 5. Reason: HTTPConnectionPool(host='metadata.google.internal', port=80): Max retries exceeded with url: /computeMetadata/v1/instance/service-accounts/default/?recursive=true (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x12740db70>: Failed to establish a new connection: [Errno 8] nodename nor servname provided, or not known'))
+2024-09-16 18:00:20 WARNING Compute Engine Metadata server unavailable on attempt 3 of 5. Reason: HTTPConnectionPool(host='metadata.google.internal', port=80): Max retries exceeded with url: /computeMetadata/v1/instance/service-accounts/default/?recursive=true (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x12740dfc0>: Failed to establish a new connection: [Errno 8] nodename nor servname provided, or not known'))
+2024-09-16 18:00:24 WARNING Compute Engine Metadata server unavailable on attempt 4 of 5. Reason: HTTPConnectionPool(host='metadata.google.internal', port=80): Max retries exceeded with url: /computeMetadata/v1/instance/service-accounts/default/?recursive=true (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x12740e4d0>: Failed to establish a new connection: [Errno 8] nodename nor servname provided, or not known'))
+2024-09-16 18:00:33 WARNING Compute Engine Metadata server unavailable on attempt 5 of 5. Reason: HTTPConnectionPool(host='metadata.google.internal', port=80): Max retries exceeded with url: /computeMetadata/v1/instance/service-accounts/default/?recursive=true (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x12740e410>: Failed to establish a new connection: [Errno 8] nodename nor servname provided, or not known'))
+
+> With anemoi-datasets create, using GCP HTTPS URL...
+** Results:
+
+(anemoi_test)  test_scripts % anemoi-datasets create test_gcp_zarr_httpsurl.yaml test_gcp_zarr.zarr
+2024-09-16 18:02:11 INFO Task init((),{}) starting
+2024-09-16 18:02:11 INFO Setting flatten_grid=True in config
+2024-09-16 18:02:11 INFO Setting ensemble_dimension=2 in config
+2024-09-16 18:02:11 INFO Setting flatten_grid=True in config
+2024-09-16 18:02:11 INFO Setting ensemble_dimension=2 in config
+2024-09-16 18:02:11 INFO {'start': datetime.datetime(2021, 12, 31, 9, 0), 'end': datetime.datetime(2021, 12, 31, 22, 0), 'frequency': '1h', 'group_by': 'monthly'}
+2024-09-16 18:02:11 INFO Groups(dates=1)
+2024-09-16 18:02:11 INFO FunctionAction: url=https://console.cloud.google.com/storage/browser/gcp-public-data-arco-era5/ar/1959-2022-1h-360x181_equiangular_with_poles_conservative.zarr param=['2m_temperature', '10m_u_component_of_wind', 'geopotential', '10m_v_component_of_wind', 'surface_pressure'] 
+2024-09-16 18:02:11 INFO Minimal input for 'init' step (using only the first date) :
+2024-09-16 18:02:11 INFO xarray-zarr(['2021-12-31T09:00:00'])
+2024-09-16 18:02:11 INFO Config loaded ok:
+2024-09-16 18:02:11 INFO Found 14 datetimes.
+2024-09-16 18:02:11 INFO Dates: Found 14 datetimes, in 1 groups: 
+2024-09-16 18:02:11 INFO Missing dates: 0
+2024-09-16 18:02:11 ERROR Error in execute
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 586, in datasource
     return _tidy(self.action.function(FunctionContext(self), self.dates, *args, **kwargs))
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray_zarr.py", line 15, in execute
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray_zarr.py", line 15, in execute
     return load_many("🇿", context, dates, url, *args, **kwargs)
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/__init__.py", line 77, in load_many
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/__init__.py", line 77, in load_many
     result.append(load_one(emoji, context, dates, path, **kwargs))
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/__init__.py", line 47, in load_one
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/__init__.py", line 47, in load_one
     data = xr.open_zarr(name_to_zarr_store(dataset), **options)
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/zarr.py", line 1103, in open_zarr
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/zarr.py", line 1103, in open_zarr
     ds = open_dataset(
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/api.py", line 611, in open_dataset
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/api.py", line 611, in open_dataset
     backend_ds = backend.open_dataset(
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/zarr.py", line 1173, in open_dataset
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/zarr.py", line 1173, in open_dataset
     store = ZarrStore.open_group(
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/zarr.py", line 483, in open_group
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/zarr.py", line 483, in open_group
     zarr_group, consolidate_on_close, close_store_on_close = _get_open_params(
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/zarr.py", line 1335, in _get_open_params
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/zarr.py", line 1335, in _get_open_params
     zarr_group = zarr.open_consolidated(store, **open_kwargs)
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/zarr/convenience.py", line 1360, in open_consolidated
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/zarr/convenience.py", line 1360, in open_consolidated
     meta_store = ConsolidatedStoreClass(store, metadata_key=metadata_key)
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/zarr/storage.py", line 3046, in __init__
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/zarr/storage.py", line 3046, in __init__
     meta = json_loads(self.store[metadata_key])
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/site-packages/zarr/util.py", line 76, in json_loads
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/zarr/util.py", line 76, in json_loads
     return json.loads(ensure_text(s, "utf-8"))
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/json/__init__.py", line 346, in loads
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/json/__init__.py", line 346, in loads
     return _default_decoder.decode(s)
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/json/decoder.py", line 337, in decode
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/json/decoder.py", line 337, in decode
     obj, end = self.raw_decode(s, idx=_w(s, 0).end())
-  File "  /miniconda3/envs/anemoi_test/lib/python3.10/json/decoder.py", line 355, in raw_decode
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/json/decoder.py", line 355, in raw_decode
     raise JSONDecodeError("Expecting value", s, err.value) from None
 json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
-2024-09-16 12:08:33 ERROR 
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/utils/cli.py", line 135, in cli_main
+    cmd.run(args)
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/commands/create.py", line 64, in run
+    self.serial_create(args)
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/commands/create.py", line 74, in serial_create
+    task("init", options)
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/commands/create.py", line 29, in task
+    result = c.run()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/__init__.py", line 355, in run
+    return self._run()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/__init__.py", line 375, in _run
+    variables = self.minimal_input.variables
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 480, in variables
+    self.build_coords()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 431, in build_coords
+    from_data = self.get_cube().user_coords
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 226, in get_cube
+    ds = self.datasource
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/functools.py", line 981, in __get__
+    val = self.func(instance)
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 90, in wrapper
+    result = method(self, *args, **kwargs)
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/template.py", line 26, in wrapper
+    result = method(self, *args, **kwargs)
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/trace.py", line 56, in wrapper
+    result = method(self, *args, **kwargs)
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 586, in datasource
+    return _tidy(self.action.function(FunctionContext(self), self.dates, *args, **kwargs))
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray_zarr.py", line 15, in execute
+    return load_many("🇿", context, dates, url, *args, **kwargs)
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/__init__.py", line 77, in load_many
+    result.append(load_one(emoji, context, dates, path, **kwargs))
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/__init__.py", line 47, in load_one
+    data = xr.open_zarr(name_to_zarr_store(dataset), **options)
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/zarr.py", line 1103, in open_zarr
+    ds = open_dataset(
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/api.py", line 611, in open_dataset
+    backend_ds = backend.open_dataset(
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/zarr.py", line 1173, in open_dataset
+    store = ZarrStore.open_group(
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/zarr.py", line 483, in open_group
+    zarr_group, consolidate_on_close, close_store_on_close = _get_open_params(
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/zarr.py", line 1335, in _get_open_params
+    zarr_group = zarr.open_consolidated(store, **open_kwargs)
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/zarr/convenience.py", line 1360, in open_consolidated
+    meta_store = ConsolidatedStoreClass(store, metadata_key=metadata_key)
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/zarr/storage.py", line 3046, in __init__
+    meta = json_loads(self.store[metadata_key])
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/zarr/util.py", line 76, in json_loads
+    return json.loads(ensure_text(s, "utf-8"))
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2024-09-16 18:02:11 ERROR 
 💣 Expecting value: line 1 column 1 (char 0)
-2024-09-16 12:08:33 ERROR 💣 Exiting
+2024-09-16 18:02:11 ERROR 💣 Exiting
 
-> With anemoi-datasets develop branch
+>>> With anemoi-datasets develop branch
 - from __init__ import add_dataset_path
 - from __init__ import open_dataset
 - ds2 = open_dataset("gs://gcp-public-data-arco-era5/ar/1959-2022-1h-360x181_equiangular_with_poles_conservative.zarr")
@@ -419,3 +1142,887 @@ File ~/miniconda3/envs/anemoi_env/lib/python3.11/site-packages/zarr/hierarchy.py
 --> 540     raise AttributeError from e
 
 AttributeError: 
+
+6) Test Subset of ERA5 ZARR from GCP saved in local. Conclusion:  With anemoi-dataset latest version, able to convert to anemoi-formatted data, HOWEVER results in an error regarding the metadata.
+
+>>> With anemoi-datasets create (w/o level set)
+- **Results:
+(anemoi_test)  test_scripts % anemoi-datasets create test_local_gcp_ar_sample_zarr.yaml test_local_gcp_ar_sample_zarr.zarr
+2024-09-16 18:06:44 INFO Task init((),{}) starting
+2024-09-16 18:06:44 INFO Setting flatten_grid=True in config
+2024-09-16 18:06:44 INFO Setting ensemble_dimension=2 in config
+2024-09-16 18:06:44 INFO Setting flatten_grid=True in config
+2024-09-16 18:06:44 INFO Setting ensemble_dimension=2 in config
+2024-09-16 18:06:44 INFO {'start': datetime.datetime(2021, 12, 31, 9, 0), 'end': datetime.datetime(2021, 12, 31, 22, 0), 'frequency': '1h', 'group_by': 'monthly'}
+2024-09-16 18:06:44 INFO Groups(dates=1)
+2024-09-16 18:06:44 INFO FunctionAction: url=gcp_ar_era5_subset.zarr param=['2m_temperature', '10m_u_component_of_wind', 'geopotential', '10m_v_component_of_wind', 'surface_pressure'] 
+2024-09-16 18:06:44 INFO Minimal input for 'init' step (using only the first date) :
+2024-09-16 18:06:44 INFO xarray-zarr(['2021-12-31T09:00:00'])
+2024-09-16 18:06:44 INFO Config loaded ok:
+2024-09-16 18:06:44 INFO Found 14 datetimes.
+2024-09-16 18:06:44 INFO Dates: Found 14 datetimes, in 1 groups: 
+2024-09-16 18:06:44 INFO Missing dates: 0
+2024-09-16 18:06:44 INFO Found 41 variables : 10m_u_component_of_wind,10m_v_component_of_wind,2m_temperature,geopotential_1,geopotential_10,geopotential_100,geopotential_1000,geopotential_125,geopotential_150,geopotential_175,geopotential_2,geopotential_20,geopotential_200,geopotential_225,geopotential_250,geopotential_3,geopotential_30,geopotential_300,geopotential_350,geopotential_400,geopotential_450,geopotential_5,geopotential_50,geopotential_500,geopotential_550,geopotential_600,geopotential_650,geopotential_7,geopotential_70,geopotential_700,geopotential_750,geopotential_775,geopotential_800,geopotential_825,geopotential_850,geopotential_875,geopotential_900,geopotential_925,geopotential_950,geopotential_975,surface_pressure.
+2024-09-16 18:06:44 INFO Found 1 ensembles : 0.
+2024-09-16 18:06:44 INFO gridpoints size: [65160, 65160]
+2024-09-16 18:06:44 INFO resolution=None
+2024-09-16 18:06:44 INFO total_shape = [14, 41, 1, 65160]
+2024-09-16 18:06:44 INFO chunks=(1, 41, 1, 65160)
+2024-09-16 18:06:44 INFO Creating Dataset 'test_local_gcp_ar_sample_zarr.zarr', with total_shape=[14, 41, 1, 65160], chunks=(1, 41, 1, 65160) and dtype='float32'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': '10m_u_component_of_wind', 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': '10m_v_component_of_wind', 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': '2m_temperature', 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 1, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 2, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 3, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 5, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 7, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 10, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 20, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 30, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 50, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 70, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 100, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 125, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 150, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 175, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 200, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 225, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 250, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 300, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 350, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 400, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 450, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 500, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 550, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 600, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 650, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 700, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 750, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 775, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 800, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 825, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 850, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 875, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 900, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 925, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 950, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 975, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'geopotential', 'level': 1000, 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'surface_pressure', 'time': '0900', 'date': '20211231', 'step': 0, 'valid_datetime': '2021-12-31T09:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:06:44 WARNING Dataset name error: the dataset name 'test_local_gcp_ar_sample_zarr' does not follow naming convention. Does not match ^(\w+)-([\w-]+)-(\w+)-(\w+)-(\d\d\d\d)-(\d\d\d\d)-(\d+h)-v(\d+)-?([a-zA-Z0-9-]+)?$
+2024-09-16 18:06:44 INFO Number of years 0 < 10, leaving out 20%. end=np.datetime64('2021-12-31T19:00:00')
+2024-09-16 18:06:44 INFO Will compute statistics from 2021-12-31T09:00:00 to 2021-12-31T19:00:00
+❌❌❌ FIXME: Config serialisation to be checked
+{"attribution": "unknown", "build": {"group_by": "monthly", "use_grib_paramid": false, "variable_naming": "default"}, "config_path": " ~ /anemoi/gh_most_uptodate/test_scripts/test_local_gcp_ar_sample_zarr.yaml", "dataset_status": "experimental", "dates": {"end": "2021-12-31 22:00:00", "frequency": "1h", "group_by": "monthly", "start": "2021-12-31 09:00:00"}, "description": "No description provided.", "input": {"xarray-zarr": {"param": ["2m_temperature", "10m_u_component_of_wind", "geopotential", "10m_v_component_of_wind", "surface_pressure"], "url": "gcp_ar_era5_subset.zarr"}}, "licence": "unknown", "output": {"chunking": {"dates": 1, "ensembles": 1}, "dtype": "float32", "ensemble_dimension": 2, "flatten_grid": true, "order_by": {"number": "ascending", "param_level": "ascending", "valid_datetime": "ascending"}, "remapping": {"param_level": "{param}_{levelist}"}, "statistics": "param_level"}, "reading_chunks": null, "statistics": {"allow_nans": []}}
+{"attribution": "unknown", "build": {"group_by": "monthly", "use_grib_paramid": false, "variable_naming": "default"}, "config_path": " ~ /anemoi/gh_most_uptodate/test_scripts/test_local_gcp_ar_sample_zarr.yaml", "dataset_status": "experimental", "dates": {"end": "2021-12-31 22:00:00", "frequency": "1h", "group_by": "monthly", "start": "2021-12-31 09:00:00"}, "description": "No description provided.", "input": {"xarray-zarr": {"param": ["2m_temperature", "10m_u_component_of_wind", "geopotential", "10m_v_component_of_wind", "surface_pressure"], "url": "gcp_ar_era5_subset.zarr"}}, "licence": "unknown", "output": {"chunking": {"dates": 1, "ensembles": 1}, "dtype": "float32", "ensemble_dimension": 2, "flatten_grid": true, "order_by": {"number": "ascending", "param_level": "ascending", "valid_datetime": "ascending"}, "remapping": {"param_level": "{param}_{levelist}"}, "statistics": "param_level"}, "reading_chunks": null, "statistics": {"allow_nans": []}}
+2024-09-16 18:06:44 INFO Task load((),{}) starting
+2024-09-16 18:06:44 INFO {'end': '2021-12-31T22:00:00', 'frequency': '1h', 'group_by': 'monthly', 'start': '2021-12-31T09:00:00'}
+2024-09-16 18:06:44 INFO Groups(dates=1)
+2024-09-16 18:06:44 INFO FunctionAction: param=['2m_temperature', '10m_u_component_of_wind', 'geopotential', '10m_v_component_of_wind', 'surface_pressure'] url=gcp_ar_era5_subset.zarr 
+Loading 573/574: 100%|████████████████████████████████████████████████| 574/574 [00:29<00:00, 19.78it/s]
+2024-09-16 18:07:16 INFO Name               : /data
+Type               : zarr.core.Array
+Data type          : float32
+Shape              : (14, 41, 1, 65160)
+Chunk shape        : (1, 41, 1, 65160)
+Order              : C
+Read-only          : True
+Compressor         : Blosc(cname='lz4', clevel=5, shuffle=SHUFFLE, blocksize=0)
+Store type         : zarr.storage.DirectoryStore
+No. bytes          : 149607360 (142.7M)
+No. bytes stored   : 92353145 (88.1M)
+Storage ratio      : 1.6
+Chunks initialized : 14/14
+
+2024-09-16 18:07:16 INFO Task finalise((),{}) starting
+2024-09-16 18:07:16 INFO Variables minimum maximum mean stdev has_nans
+10m_u_component_of_wind -19.22 20.98 -0.19 5.10 0.00
+10m_v_component_of_wind -18.40 22.43 -0.31 4.51 0.00
+2m_temperature 221.06 316.17 277.19 20.41 0.00
+geopotential_1 425099.12 493273.97 465659.10 17453.64 0.00
+geopotential_10 275382.28 311927.84 300915.73 9302.10 0.00
+geopotential_100 147745.34 163643.91 157286.27 5051.06 0.00
+geopotential_1000 -3148.51 3412.69 803.08 1071.14 0.00
+geopotential_125 134741.56 151257.64 143845.12 5458.15 0.00
+geopotential_150 123852.06 140592.05 132735.76 5688.41 0.00
+geopotential_175 114547.15 131239.23 123239.62 5779.90 0.00
+geopotential_2 375595.91 435469.00 413513.09 15086.42 0.00
+geopotential_20 237253.33 263741.97 256186.92 6838.97 0.00
+geopotential_200 106404.47 122853.99 114930.94 5763.09 0.00
+geopotential_225 99154.48 115186.59 107532.01 5657.73 0.00
+geopotential_250 92567.17 108154.01 100847.66 5482.72 0.00
+geopotential_3 348050.31 402489.88 383738.78 13593.41 0.00
+geopotential_30 215299.84 236499.61 230671.61 5568.11 0.00
+geopotential_300 81098.05 95595.55 89073.25 5014.69 0.00
+geopotential_350 71283.67 84574.07 78837.49 4508.30 0.00
+geopotential_400 62706.44 74810.72 69719.14 4029.09 0.00
+geopotential_450 55092.68 66061.89 61473.06 3593.01 0.00
+geopotential_5 315959.47 362728.69 347604.26 11759.93 0.00
+geopotential_50 187061.36 204328.94 199091.86 4535.69 0.00
+geopotential_500 48186.63 58045.56 53934.92 3200.09 0.00
+geopotential_550 41836.48 50625.60 46985.87 2844.82 0.00
+geopotential_600 35929.71 43804.48 40536.81 2522.16 0.00
+geopotential_650 30078.14 37560.64 34516.64 2227.84 0.00
+geopotential_7 295866.34 337658.84 324624.08 10574.69 0.00
+geopotential_70 168151.08 183816.19 178658.50 4480.88 0.00
+geopotential_700 24547.81 31691.87 28867.42 1960.86 0.00
+geopotential_750 19335.88 26146.02 23545.67 1721.18 0.00
+geopotential_775 16833.86 23534.42 20996.56 1611.84 0.00
+geopotential_800 14402.37 21070.07 18516.78 1509.99 0.00
+geopotential_825 12036.17 18667.33 16103.02 1416.23 0.00
+geopotential_850 9733.97 16322.85 13752.33 1331.52 0.00
+geopotential_875 7452.32 14033.64 11461.61 1256.85 0.00
+geopotential_900 5226.78 11806.53 9227.80 1193.17 0.00
+geopotential_925 3055.42 9639.81 7047.96 1141.47 0.00
+geopotential_950 938.20 7520.03 4918.94 1102.91 0.00
+geopotential_975 -1126.84 5445.05 2838.09 1079.21 0.00
+surface_pressure 51776.86 104166.40 96732.04 9546.72 0.00
+2024-09-16 18:07:16 INFO Wrote statistics in test_local_gcp_ar_sample_zarr.zarr
+Computing size of test_local_gcp_ar_sample_zarr.zarr: 16it [00:00, 32186.51it/s]
+2024-09-16 18:07:16 INFO Total size: 88.1 MiB
+2024-09-16 18:07:16 INFO Total number of files: 60
+2024-09-16 18:07:16 INFO Task patch((),{}) starting
+2024-09-16 18:07:16 INFO ✅ Remove _create_yaml_config
+2024-09-16 18:07:16 INFO Dataset changed by patch
+2024-09-16 18:07:16 INFO Task init_additions((),{}) starting
+2024-09-16 18:07:16 WARNING No delta found in kwargs, no addtions will be computed.
+2024-09-16 18:07:16 INFO Task run_additions((),{}) starting
+2024-09-16 18:07:16 WARNING No delta found in kwargs, no addtions will be computed.
+2024-09-16 18:07:16 INFO Task finalise_additions((),{}) starting
+2024-09-16 18:07:16 WARNING No delta found in kwargs, no addtions will be computed.
+Computing size of test_local_gcp_ar_sample_zarr.zarr: 16it [00:00, 32832.13it/s]
+2024-09-16 18:07:16 INFO Total size: 88.1 MiB
+2024-09-16 18:07:16 INFO Total number of files: 60
+2024-09-16 18:07:16 INFO Task cleanup((),{}) starting
+2024-09-16 18:07:16 INFO Task verify((),{}) starting
+2024-09-16 18:07:16 INFO Verifying dataset at test_local_gcp_ar_sample_zarr.zarr
+2024-09-16 18:07:16 INFO test_local_gcp_ar_sample_zarr.zarr
+2024-09-16 18:07:16 INFO Create completed in 32 seconds
+
+7) Test ZARR in ECMWF site. Conclusion: Issues with conversion and failed to open store with metadata.
+
+>>> With create from anemoi-datasets main:
+- **Results:
+(anemoi_test)  test_scripts % anemoi-datasets create test_ecmwf_zarr.yaml test_ecmwf_zarr.zarr
+2024-09-16 18:20:42 INFO Task init((),{}) starting
+2024-09-16 18:20:42 INFO Setting flatten_grid=True in config
+2024-09-16 18:20:42 INFO Setting ensemble_dimension=2 in config
+2024-09-16 18:20:42 INFO Setting flatten_grid=True in config
+2024-09-16 18:20:42 INFO Setting ensemble_dimension=2 in config
+2024-09-16 18:20:42 INFO {'start': datetime.datetime(2021, 12, 31, 9, 0), 'end': datetime.datetime(2021, 12, 31, 22, 0), 'frequency': '1h', 'group_by': 'monthly'}
+2024-09-16 18:20:42 INFO Groups(dates=1)
+2024-09-16 18:20:42 INFO FunctionAction: url=https://object-store.os-api.cci1.ecmwf.int/ml-examples/an-oper-2023-2023-2p5-6h-v1.zarr param=['2t'] 
+2024-09-16 18:20:42 INFO Minimal input for 'init' step (using only the first date) :
+2024-09-16 18:20:42 INFO xarray-zarr(['2021-12-31T09:00:00'])
+2024-09-16 18:20:42 INFO Config loaded ok:
+2024-09-16 18:20:42 INFO Found 14 datetimes.
+2024-09-16 18:20:42 INFO Dates: Found 14 datetimes, in 1 groups: 
+2024-09-16 18:20:42 INFO Missing dates: 0
+ ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/zarr.py:1103: RuntimeWarning: Failed to open Zarr store with consolidated metadata, but successfully read with non-consolidated metadata. This is typically much slower for opening a dataset. To silence this warning, consider:
+1. Consolidating metadata in this existing store with zarr.consolidate_metadata().
+2. Explicitly setting consolidated=False, to avoid trying to read consolidate metadata, or
+3. Explicitly setting consolidated=True, to raise an error in this case instead of falling back to try reading non-consolidated metadata.
+  ds = open_dataset(
+ ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/zarr/hierarchy.py:687: UserWarning: Store <anemoi.datasets.data.stores.HTTPStore object at 0x1342773d0> has no `listdir` method. From zarr 2.9 onwards may want to inherit from `Store`.
+  for key in sorted(listdir(self._store, self._path)):
+2024-09-16 18:20:43 ERROR Error in execute
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 586, in datasource
+    return _tidy(self.action.function(FunctionContext(self), self.dates, *args, **kwargs))
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray_zarr.py", line 15, in execute
+    return load_many("🇿", context, dates, url, *args, **kwargs)
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/__init__.py", line 77, in load_many
+    result.append(load_one(emoji, context, dates, path, **kwargs))
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/__init__.py", line 47, in load_one
+    data = xr.open_zarr(name_to_zarr_store(dataset), **options)
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/zarr.py", line 1103, in open_zarr
+    ds = open_dataset(
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/api.py", line 611, in open_dataset
+    backend_ds = backend.open_dataset(
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/zarr.py", line 1188, in open_dataset
+    ds = store_entrypoint.open_dataset(
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/store.py", line 43, in open_dataset
+    vars, attrs = filename_or_obj.load()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/common.py", line 222, in load
+    (_decode_variable_name(k), v) for k, v in self.get_variables().items()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/zarr.py", line 563, in get_variables
+    return FrozenDict(
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/core/utils.py", line 416, in FrozenDict
+    return Frozen(dict(*args, **kwargs))
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/zarr.py", line 563, in <genexpr>
+    return FrozenDict(
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/zarr/hierarchy.py", line 687, in _array_iter
+    for key in sorted(listdir(self._store, self._path)):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/zarr/storage.py", line 250, in listdir
+    return _listdir_from_keys(store, path)
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/zarr/_storage/store.py", line 673, in _listdir_from_keys
+    for key in list(store.keys()):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/_collections_abc.py", line 866, in __len__
+    return len(self._mapping)
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/data/stores.py", line 38, in __len__
+    raise NotImplementedError()
+NotImplementedError
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/bin/anemoi-datasets", line 8, in <module>
+    sys.exit(main())
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/__main__.py", line 24, in main
+    cli_main(__version__, __doc__, COMMANDS)
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/utils/cli.py", line 135, in cli_main
+    cmd.run(args)
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/commands/create.py", line 64, in run
+    self.serial_create(args)
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/commands/create.py", line 74, in serial_create
+    task("init", options)
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/commands/create.py", line 29, in task
+    result = c.run()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/__init__.py", line 355, in run
+    return self._run()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/__init__.py", line 375, in _run
+    variables = self.minimal_input.variables
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 480, in variables
+    self.build_coords()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 431, in build_coords
+    from_data = self.get_cube().user_coords
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 226, in get_cube
+    ds = self.datasource
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/functools.py", line 981, in __get__
+    val = self.func(instance)
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 90, in wrapper
+    result = method(self, *args, **kwargs)
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/template.py", line 26, in wrapper
+    result = method(self, *args, **kwargs)
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/trace.py", line 56, in wrapper
+    result = method(self, *args, **kwargs)
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 586, in datasource
+    return _tidy(self.action.function(FunctionContext(self), self.dates, *args, **kwargs))
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray_zarr.py", line 15, in execute
+    return load_many("🇿", context, dates, url, *args, **kwargs)
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/__init__.py", line 77, in load_many
+    result.append(load_one(emoji, context, dates, path, **kwargs))
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/__init__.py", line 47, in load_one
+    data = xr.open_zarr(name_to_zarr_store(dataset), **options)
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/zarr.py", line 1103, in open_zarr
+    ds = open_dataset(
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/api.py", line 611, in open_dataset
+    backend_ds = backend.open_dataset(
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/zarr.py", line 1188, in open_dataset
+    ds = store_entrypoint.open_dataset(
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/store.py", line 43, in open_dataset
+    vars, attrs = filename_or_obj.load()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/common.py", line 222, in load
+    (_decode_variable_name(k), v) for k, v in self.get_variables().items()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/zarr.py", line 563, in get_variables
+    return FrozenDict(
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/core/utils.py", line 416, in FrozenDict
+    return Frozen(dict(*args, **kwargs))
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/xarray/backends/zarr.py", line 563, in <genexpr>
+    return FrozenDict(
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/zarr/hierarchy.py", line 687, in _array_iter
+    for key in sorted(listdir(self._store, self._path)):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/zarr/storage.py", line 250, in listdir
+    return _listdir_from_keys(store, path)
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/zarr/_storage/store.py", line 673, in _listdir_from_keys
+    for key in list(store.keys()):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/_collections_abc.py", line 866, in __len__
+    return len(self._mapping)
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/data/stores.py", line 38, in __len__
+    raise NotImplementedError()
+NotImplementedError
+
+8) Test the netcdf with kerchunk formatted configuration file. Conclusion: Able to generate anemoi-formatted data file, HOWEVER getting metadata error
+
+>>> With create from anemoi-datasets latest main:
+- **Results:
+(anemoi_test)  test_scripts % anemoi-datasets create test_s3_nc.yaml test_s3_nc.zarr
+
+2024-09-16 18:27:58 INFO Task init((),{}) starting
+2024-09-16 18:27:58 INFO Setting flatten_grid=True in config
+2024-09-16 18:27:58 INFO Setting ensemble_dimension=2 in config
+2024-09-16 18:27:58 INFO Setting flatten_grid=True in config
+2024-09-16 18:27:58 INFO Setting ensemble_dimension=2 in config
+2024-09-16 18:27:58 INFO {'start': datetime.datetime(2024, 3, 1, 20, 0), 'end': datetime.datetime(2024, 3, 1, 23, 0), 'frequency': '1h', 'group_by': 'monthly'}
+2024-09-16 18:27:58 INFO Groups(dates=1)
+2024-09-16 18:27:58 INFO FunctionAction: json=combined.json param=PV level=[1000, 50] 
+2024-09-16 18:27:58 INFO Minimal input for 'init' step (using only the first date) :
+2024-09-16 18:27:58 INFO xarray-kerchunk(['2024-03-01T20:00:00'])
+2024-09-16 18:27:58 INFO Config loaded ok:
+2024-09-16 18:27:58 INFO Found 4 datetimes.
+2024-09-16 18:27:58 INFO Dates: Found 4 datetimes, in 1 groups: 
+2024-09-16 18:27:58 INFO Missing dates: 0
+2024-09-16 18:27:58 INFO Read reference from URL combined.json
+2024-09-16 18:27:58 INFO Found 2 variables : PV_1000,PV_50.
+2024-09-16 18:27:58 INFO Found 1 ensembles : 0.
+2024-09-16 18:27:58 INFO gridpoints size: [1038240, 1038240]
+2024-09-16 18:27:58 INFO resolution=None
+2024-09-16 18:27:58 INFO total_shape = [4, 2, 1, 1038240]
+2024-09-16 18:27:58 INFO chunks=(1, 2, 1, 1038240)
+2024-09-16 18:27:58 INFO Creating Dataset 'test_s3_nc.zarr', with total_shape=[4, 2, 1, 1038240], chunks=(1, 2, 1, 1038240) and dtype='float32'
+2024-09-16 18:27:58 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'PV', 'level': 1000, 'time': '2000', 'date': '20240301', 'step': 0, 'valid_datetime': '2024-03-01T20:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:27:58 ERROR Error in retrieving metadata (cannot build data request info) for XArrayMetadata({'variable': 'PV', 'level': 50, 'time': '2000', 'date': '20240301', 'step': 0, 'valid_datetime': '2024-03-01T20:00:00'})
+Traceback (most recent call last):
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/input.py", line 111, in _data_request
+    date = field.datetime()["valid_time"]
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/fieldlist.py", line 512, in datetime
+    return self._metadata.datetime()
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/earthkit/data/core/metadata.py", line 312, in datetime
+    "base_time": self._base_datetime(),
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/metadata.py", line 84, in _base_datetime
+    return self._field.forecast_reference_time
+  File " ~/miniconda3/envs/anemoi_test/lib/python3.10/site-packages/anemoi/datasets/create/functions/sources/xarray/field.py", line 106, in forecast_reference_time
+    return self.owner.forecast_reference_time
+AttributeError: 'Variable' object has no attribute 'forecast_reference_time'
+2024-09-16 18:27:58 WARNING Dataset name error: the dataset name 'test_s3_nc' does not follow naming convention. Does not match ^(\w+)-([\w-]+)-(\w+)-(\w+)-(\d\d\d\d)-(\d\d\d\d)-(\d+h)-v(\d+)-?([a-zA-Z0-9-]+)?$
+2024-09-16 18:27:58 INFO Number of years 0 < 10, leaving out 20%. end=np.datetime64('2024-03-01T22:00:00')
+2024-09-16 18:27:58 INFO Will compute statistics from 2024-03-01T20:00:00 to 2024-03-01T22:00:00
+❌❌❌ FIXME: Config serialisation to be checked
+{"attribution": "unknown", "build": {"group_by": "monthly", "use_grib_paramid": false, "variable_naming": "default"}, "config_path": " ~ /anemoi/gh_most_uptodate/test_scripts/test_s3_nc.yaml", "dataset_status": "experimental", "dates": {"end": "2024-03-01 23:00:00", "frequency": "1h", "group_by": "monthly", "start": "2024-03-01 20:00:00"}, "description": "No description provided.", "input": {"xarray-kerchunk": {"json": "combined.json", "level": [1000, 50], "param": "PV"}}, "licence": "unknown", "output": {"chunking": {"dates": 1, "ensembles": 1}, "dtype": "float32", "ensemble_dimension": 2, "flatten_grid": true, "order_by": {"number": "ascending", "param_level": "ascending", "valid_datetime": "ascending"}, "remapping": {"param_level": "{param}_{levelist}"}, "statistics": "param_level"}, "reading_chunks": null, "statistics": {"allow_nans": []}}
+{"attribution": "unknown", "build": {"group_by": "monthly", "use_grib_paramid": false, "variable_naming": "default"}, "config_path": " ~ /anemoi/gh_most_uptodate/test_scripts/test_s3_nc.yaml", "dataset_status": "experimental", "dates": {"end": "2024-03-01 23:00:00", "frequency": "1h", "group_by": "monthly", "start": "2024-03-01 20:00:00"}, "description": "No description provided.", "input": {"xarray-kerchunk": {"json": "combined.json", "level": [1000, 50], "param": "PV"}}, "licence": "unknown", "output": {"chunking": {"dates": 1, "ensembles": 1}, "dtype": "float32", "ensemble_dimension": 2, "flatten_grid": true, "order_by": {"number": "ascending", "param_level": "ascending", "valid_datetime": "ascending"}, "remapping": {"param_level": "{param}_{levelist}"}, "statistics": "param_level"}, "reading_chunks": null, "statistics": {"allow_nans": []}}
+2024-09-16 18:27:58 INFO Task load((),{}) starting
+2024-09-16 18:27:58 INFO {'end': '2024-03-01T23:00:00', 'frequency': '1h', 'group_by': 'monthly', 'start': '2024-03-01T20:00:00'}
+2024-09-16 18:27:58 INFO Groups(dates=1)
+2024-09-16 18:27:58 INFO FunctionAction: json=combined.json level=[1000, 50] param=PV 
+Loading 7/8: 100%|████████████████████████████████████████████████████████| 8/8 [00:58<00:00,  7.28s/it]
+2024-09-16 18:28:57 INFO Name               : /data
+Type               : zarr.core.Array
+Data type          : float32
+Shape              : (4, 2, 1, 1038240)
+Chunk shape        : (1, 2, 1, 1038240)
+Order              : C
+Read-only          : True
+Compressor         : Blosc(cname='lz4', clevel=5, shuffle=SHUFFLE, blocksize=0)
+Store type         : zarr.storage.DirectoryStore
+No. bytes          : 33223680 (31.7M)
+No. bytes stored   : 15808305 (15.1M)
+Storage ratio      : 2.1
+Chunks initialized : 4/4
+
+2024-09-16 18:28:57 INFO Task finalise((),{}) starting
+2024-09-16 18:28:57 INFO Variables minimum maximum mean stdev has_nans
+PV_1000 -0.00 0.00 -0.00 0.00 0.00
+PV_50 -0.00 0.00 -0.00 0.00 0.00
+2024-09-16 18:28:57 INFO Wrote statistics in test_s3_nc.zarr
+Computing size of test_s3_nc.zarr: 16it [00:00, 31126.56it/s]
+2024-09-16 18:28:57 INFO Total size: 15.2 MiB
+2024-09-16 18:28:57 INFO Total number of files: 78
+2024-09-16 18:28:57 INFO Task patch((),{}) starting
+2024-09-16 18:28:57 INFO ✅ Remove _create_yaml_config
+2024-09-16 18:28:57 INFO Dataset changed by patch
+2024-09-16 18:28:57 INFO Task init_additions((),{}) starting
+2024-09-16 18:28:57 WARNING No delta found in kwargs, no addtions will be computed.
+2024-09-16 18:28:57 INFO Task run_additions((),{}) starting
+2024-09-16 18:28:57 WARNING No delta found in kwargs, no addtions will be computed.
+2024-09-16 18:28:57 INFO Task finalise_additions((),{}) starting
+2024-09-16 18:28:57 WARNING No delta found in kwargs, no addtions will be computed.
+Computing size of test_s3_nc.zarr: 16it [00:00, 31126.56it/s]
+2024-09-16 18:28:57 INFO Total size: 15.2 MiB
+2024-09-16 18:28:57 INFO Total number of files: 78
+2024-09-16 18:28:57 INFO Task cleanup((),{}) starting
+2024-09-16 18:28:57 INFO Task verify((),{}) starting
+2024-09-16 18:28:57 INFO Verifying dataset at test_s3_nc.zarr
+2024-09-16 18:28:57 INFO test_s3_nc.zarr
+2024-09-16 18:28:57 INFO Create completed in 58 seconds
