@@ -7,6 +7,7 @@
 # nor does it submit to any jurisdiction.
 #
 
+import datetime
 import logging
 
 from earthkit.data.core.fieldlist import Field
@@ -71,13 +72,18 @@ class XArrayField(Field):
     def shape(self):
         return self._shape
 
-    def to_numpy(self, flatten=False, dtype=None):
-        values = self.selection.values
+    def to_numpy(self, flatten=False, dtype=None, index=None):
+        if index is not None:
+            values = self.selection[index]
+        else:
+            values = self.selection
 
         assert dtype is None
+
         if flatten:
-            return values.flatten()
-        return values.reshape(self.shape)
+            return values.values.flatten()
+
+        return values  # .reshape(self.shape)
 
     def _make_metadata(self):
         return XArrayMetadata(self)
@@ -103,7 +109,16 @@ class XArrayField(Field):
 
     @property
     def forecast_reference_time(self):
-        return self.owner.forecast_reference_time
+        date, time = self.metadata("date", "time")
+        assert len(time) == 4, time
+        assert len(date) == 8, date
+        yyyymmdd = int(date)
+        time = int(time) // 100
+        return datetime.datetime(yyyymmdd // 10000, yyyymmdd // 100 % 100, yyyymmdd % 100, time)
 
     def __repr__(self):
         return repr(self._metadata)
+
+    def _values(self):
+        # we don't use .values as this will download the data
+        return self.selection

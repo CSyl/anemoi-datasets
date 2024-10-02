@@ -40,7 +40,9 @@ class _MDMapping:
         return f"MDMapping({self.mapping})"
 
     def fill_time_metadata(self, field, md):
-        md["valid_datetime"] = as_datetime(self.variable.time.fill_time_metadata(field._md, md)).isoformat()
+        valid_datetime = self.variable.time.fill_time_metadata(field._md, md)
+        if valid_datetime is not None:
+            md["valid_datetime"] = as_datetime(valid_datetime).isoformat()
 
 
 class XArrayMetadata(RawMetadata):
@@ -70,15 +72,7 @@ class XArrayMetadata(RawMetadata):
             return self._as_mars()
 
     def _as_mars(self):
-        return dict(
-            param=self["variable"],
-            step=self["step"],
-            levelist=self["level"],
-            levtype=self["levtype"],
-            number=self["number"],
-            date=self["date"],
-            time=self["time"],
-        )
+        return {}
 
     def _base_datetime(self):
         return self._field.forecast_reference_time
@@ -135,12 +129,12 @@ class XArrayFieldGeography(Geography):
         # TODO: implement resolution
         return None
 
-    @property
+    # @property
     def mars_grid(self):
         # TODO: implement mars_grid
         return None
 
-    @property
+    # @property
     def mars_area(self):
         # TODO: code me
         # return [self.north, self.west, self.south, self.east]
